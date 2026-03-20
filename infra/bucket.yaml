@@ -2,6 +2,7 @@ apiVersion: s3.aws.upbound.io/v1beta1
 kind: Bucket
 metadata:
   name: demo-bucket-crossplane
+  namespace: default
 spec:
   forProvider:
     region: us-east-1
