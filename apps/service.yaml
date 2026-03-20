@@ -1,61 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-name: nginx-demo
+  name: nginx-demo
 spec:
-selector:
-app: nginx-demo
-ports:
-
-* port: 80
-  targetPort: 80
-  EOF
-
-# =========================
-
-# Git init + push
-
-# =========================
-
-git init
-git add .
-git commit -m "Initial commit: nginx app"
-
-git branch -M main
-
-# Remove existing origin if exists
-
-git remote remove origin 2>/dev/null || true
-
-git remote add origin https://github.com/knottysanka/argocd-demo.git
-
-echo "🚀 Pushing to GitHub..."
-git push -u origin main
-
-# =========================
-
-# Create Argo Application
-
-# =========================
-
-echo "🚀 Creating Argo Application..."
-
-cat <<EOF | kubectl apply -f -
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-name: nginx-demo
-namespace: argocd
-spec:
-project: default
-source:
-repoURL: https://github.com/knottysanka/argocd-demo.git
-targetRevision: main
-path: apps
-destination:
-server: https://kubernetes.default.svc
-namespace: default
-syncPolicy:
-automated:
-prune: true
-selfHeal: true
+  selector:
+    app: nginx-demo
+  ports:
+    - port: 80
+      targetPort: 80
