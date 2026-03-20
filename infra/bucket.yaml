@@ -2,7 +2,8 @@ apiVersion: s3.aws.upbound.io/v1beta1
 kind: Bucket
 metadata:
   name: demo-bucket-crossplane
-  namespace: default   # 🔥 MUST EXIST
+  annotations:
+    crossplane.io/external-name: demo-bucket-crossplane-12345
 spec:
   forProvider:
     region: us-east-1
