@@ -1,0 +1,13 @@
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  name: e2e-test-001
+  annotations:
+    crossplane.io/external-name: e2e-test-001
+  labels:
+    purpose: e2e-testing
+spec:
+  forProvider:
+    region: us-east-1
+  providerConfigRef:
+    name: default
