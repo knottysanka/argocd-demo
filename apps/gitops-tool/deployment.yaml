@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitops-tool
+  namespace: default
+  labels:
+    app: gitops-tool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitops-tool
+  template:
+    metadata:
+      labels:
+        app: gitops-tool
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.27.4
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d
+        - name: auth
+          mountPath: /etc/nginx/auth
+          readOnly: true
+      volumes:
+      - name: html
+        configMap:
+          name: gitops-tool-html
+      - name: nginx-conf
+        configMap:
+          name: gitops-tool-nginx-conf
+      - name: auth
+        secret:
+          secretName: gitops-tool-auth

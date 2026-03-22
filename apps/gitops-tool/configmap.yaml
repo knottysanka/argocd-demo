@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitops-tool-html
+  namespace: default
+  labels:
+    app: gitops-tool
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitOps Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      :root{
+        --bg:#f8f9fa;--surface:#fff;--border:#e2e4e8;
+        --text:#1a1d23;--muted:#6b7280;--mono:#374151;
+        --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+        --amber:#b45309;--amber-bg:#fffbeb;--amber-border:#fde68a;
+        --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+        --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+        --accent:#2563eb;
+      }
+      body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px}
+      .wrap{width:100%;max-width:680px;display:flex;flex-direction:column;gap:20px}
+      .header{display:flex;align-items:center;justify-content:space-between}
+      .title{font-size:17px;font-weight:500;display:flex;align-items:center;gap:8px}
+      .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px var(--green-bg)}
+      .status-row{display:flex;gap:10px}
+      .pill{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);color:var(--muted);background:var(--surface)}
+      .pill.ok{border-color:var(--green-border);color:var(--green);background:var(--green-bg)}
+      .pill.warn{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+      .input-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+      .input-row{display:flex;gap:0}
+      textarea{flex:1;border:none;outline:none;padding:14px 16px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);resize:none;background:transparent;line-height:1.5}
+      textarea::placeholder{color:#9ca3af}
+      .send{width:44px;flex-shrink:0;border:none;background:transparent;cursor:pointer;color:var(--accent);font-size:18px;transition:opacity .15s;align-self:flex-end;padding-bottom:12px}
+      .send:hover{opacity:.7}
+      .send:disabled{opacity:.3;cursor:not-allowed}
+      .chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;border-top:1px solid var(--border)}
+      .chip{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--muted);cursor:pointer;transition:all .1s;white-space:nowrap}
+      .chip:hover{border-color:var(--accent);color:var(--accent);background:var(--blue-bg)}
+      .model-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--border)}
+      .model-label{font-size:12px;color:var(--muted)}
+      select{font-family:'IBM Plex Mono',monospace;font-size:12px;border:1px solid var(--border);border-radius:4px;padding:3px 6px;background:var(--surface);color:var(--text);outline:none;cursor:pointer}
+      .api-key-wrap{display:flex;align-items:center;gap:6px;margin-left:auto}
+      .api-input{font-family:'IBM Plex Mono',monospace;font-size:11px;border:1px solid var(--border);border-radius:4px;padding:3px 8px;background:var(--bg);color:var(--text);outline:none;width:180px}
+      .api-input:focus{border-color:var(--accent)}
+      .api-input::placeholder{color:#9ca3af}
+      .results{display:flex;flex-direction:column;gap:12px}
+      .entry{border-radius:8px;overflow:hidden;border:1px solid var(--border);background:var(--surface);animation:fadeIn .2s ease}
+      @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+      .entry-user{background:var(--blue-bg);border-color:var(--blue-border)}
+      .entry-user-text{padding:10px 14px;font-size:13px;color:var(--blue);font-weight:500}
+      .step-row{display:flex;align-items:center;gap:8px;padding:7px 14px;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+      .step-row:last-child{border-bottom:none}
+      .step-row.active{color:var(--blue);background:var(--blue-bg)}
+      .step-row.done{color:var(--green)}
+      .step-row.error{color:var(--red)}
+      .step-icon{flex-shrink:0;width:14px;text-align:center}
+      .spinner{width:10px;height:10px;border:1.5px solid #bfdbfe;border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .tool-block{border-top:1px solid var(--border)}
+      .tool-header{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--bg);cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:11px}
+      .tool-header:hover{background:#f1f5f9}
+      .tool-tag{padding:2px 5px;border-radius:3px;font-size:10px;font-weight:500}
+      .tool-tag.github{background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff}
+      .tool-tag.argocd{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+      .tool-name-text{color:var(--mono);flex:1}
+      .tool-status-text{margin-left:auto}
+      .tool-status-text.ok{color:var(--green)}
+      .tool-status-text.running{color:var(--blue)}
+      .tool-body{padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.7;color:var(--muted);border-top:1px solid var(--border);display:none}
+      .tool-body.open{display:block}
+      .tool-kv{display:flex;gap:6px}
+      .tool-k{color:#9ca3af;flex-shrink:0}
+      .tool-v{color:var(--mono)}
+      .tool-v.out{color:var(--green)}
+      .response-block{padding:12px 14px;font-size:13px;line-height:1.8;color:var(--text);border-top:1px solid var(--border)}
+      .response-block code{font-family:'IBM Plex Mono',monospace;font-size:11px;background:var(--bg);padding:1px 4px;border-radius:3px;border:1px solid var(--border)}
+      .result-block{margin:8px 14px 12px;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+      .result-header{padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px}
+      .result-header.ok{background:var(--green-bg);color:var(--green);border-bottom:1px solid var(--green-border)}
+      .result-header.warn{background:var(--amber-bg);color:var(--amber);border-bottom:1px solid var(--amber-border)}
+      .result-rows{display:grid;grid-template-columns:auto 1fr}
+      .rk{padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
+      .rv{padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);border-bottom:1px solid var(--border)}
+      .rk:last-of-type,.rv:last-of-type{border-bottom:none}
+      .cursor{display:inline-block;width:2px;height:12px;background:var(--accent);margin-left:1px;vertical-align:middle;animation:blink .7s step-end infinite}
+      @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+      .empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px}
+      .empty-icon{font-size:28px;margin-bottom:12px}
+    </style>
+    </head>
+    <body>
+    <div class="wrap">
+      <div class="header">
+        <div class="title"><div class="dot"></div>GitOps Agent Tool</div>
+        <div class="status-row">
+          <span class="pill ok" id="pill-argo">ArgoCD</span>
+          <span class="pill ok" id="pill-git">GitHub</span>
+          <span class="pill warn" id="pill-drift">1 drift</span>
+        </div>
+      </div>
+      <div class="input-card">
+        <div class="input-row">
+          <textarea id="inp" rows="2" placeholder="e.g. health check, sync demo-infra, create s3 bucket test-002..."></textarea>
+          <button class="send" id="send-btn">↑</button>
+        </div>
+        <div class="chips">
+          <span class="chip" onclick="run('health check')">health check</span>
+          <span class="chip" onclick="run('list S3 buckets')">list buckets</span>
+          <span class="chip" onclick="run('sync demo-infra')">sync demo-infra</span>
+          <span class="chip" onclick="run('create s3 bucket test-002')">new bucket</span>
+          <span class="chip" onclick="run('scale nginx to 3 replicas')">scale nginx</span>
+          <span class="chip" onclick="run('show ArgoCD apps')">show apps</span>
+        </div>
+        <div class="model-row">
+          <span class="model-label">model</span>
+          <select id="model-sel">
+            <option value="claude">Claude (claude-sonnet-4-20250514)</option>
+            <option value="gpt4">GPT-4o</option>
+            <option value="gemini">Gemini 1.5 Pro</option>
+            <option value="custom">Custom / OpenAI-compatible</option>
+          </select>
+          <div class="api-key-wrap">
+            <input class="api-input" id="api-key" type="password" placeholder="API key (optional)"/>
+          </div>
+        </div>
+      </div>
+      <div class="results" id="results">
+        <div class="empty" id="empty-state"><div class="empty-icon">⚡</div>Type a command or click a chip to run a GitOps action.</div>
+      </div>
+    </div>
+    <script>
+    const $=id=>document.getElementById(id);
+    const results=$('results');
+    $('inp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();run();}});
+    $('send-btn').addEventListener('click',()=>run());
+    function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+    function removeEmpty(){const e=$('empty-state');if(e)e.remove();}
+    function addUserBubble(text){removeEmpty();const d=document.createElement('div');d.className='entry entry-user';d.innerHTML=`<div class="entry-user-text">${escHtml(text)}</div>`;results.appendChild(d);return d;}
+    function addAgentEntry(){const d=document.createElement('div');d.className='entry';results.appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});return d;}
+    function addStep(c,text,status='active'){const key='s'+Math.random().toString(36).slice(2);const d=document.createElement('div');d.className=`step-row ${status}`;d.id=key;d.innerHTML=`<span class="step-icon">${stepIcon(status)}</span><span>${escHtml(text)}</span>`;c.appendChild(d);return key;}
+    function updateStep(key,status){const el=document.getElementById(key);if(!el)return;el.className=`step-row ${status}`;el.querySelector('.step-icon').innerHTML=stepIcon(status);}
+    function stepIcon(s){if(s==='active')return '<div class="spinner"></div>';if(s==='done')return '✓';if(s==='error')return '✗';return '·';}
+    function addTool(c,name,cat,status,input,output){const key='t'+Math.random().toString(36).slice(2);const d=document.createElement('div');d.className='tool-block';const outHtml=output?`<div class="tool-kv"><span class="tool-k">out</span><span class="tool-v out">${escHtml(JSON.stringify(output).slice(0,200))}</span></div>`:'';d.innerHTML=`<div class="tool-header" onclick="toggleTool('${key}')"><span class="tool-tag ${cat}">${cat}</span><span class="tool-name-text">${escHtml(name)}</span><span class="tool-status-text ${status}" id="ts-${key}">${status==='running'?'<div class="spinner"></div>':status==='ok'?'✓ done':'✗ error'}</span></div><div class="tool-body" id="tb-${key}"><div class="tool-kv"><span class="tool-k">in</span><span class="tool-v">${escHtml(JSON.stringify(input).slice(0,200))}</span></div>${outHtml}</div>`;c.appendChild(d);return key;}
+    function updateTool(key,status,output){const ts=document.getElementById('ts-'+key);if(ts)ts.innerHTML=status==='ok'?'<span class="tool-status-text ok">✓ done</span>':status==='error'?'<span class="tool-status-text error">✗ error</span>':'';if(output){const tb=document.getElementById('tb-'+key);if(tb){const ex=tb.querySelector('.tool-v.out');if(ex)ex.textContent=JSON.stringify(output).slice(0,200);else{const d=document.createElement('div');d.className='tool-kv';d.innerHTML=`<span class="tool-k">out</span><span class="tool-v out">${escHtml(JSON.stringify(output).slice(0,200))}</span>`;tb.appendChild(d);}}}}
+    function toggleTool(key){const tb=document.getElementById('tb-'+key);if(tb)tb.classList.toggle('open');}
+    function addResponse(c){const d=document.createElement('div');d.className='response-block';c.appendChild(d);return d;}
+    async function streamInto(el,text){const words=text.split(' ');let cur='';for(const w of words){cur+=(cur?' ':'')+w;el.innerHTML=renderMd(cur)+'<span class="cursor"></span>';await sleep(16+Math.random()*18);}el.innerHTML=renderMd(text);}
+    function addResult(c,type,data){if(!data||type==='info')return;const isOk=!data.issues||data.issues===0;const rows=buildRows(type,data);const d=document.createElement('div');d.className='result-block';d.innerHTML=`<div class="result-header ${isOk?'ok':'warn'}">${isOk?'✓':'⚠'} ${resultTitle(type)}</div><div class="result-rows">${rows.map(([k,v])=>`<div class="rk">${escHtml(k)}</div><div class="rv">${escHtml(String(v))}</div>`).join('')}</div>`;c.appendChild(d);}
+    function buildRows(type,d){if(type==='health')return[['apps',d.apps],['resources',d.resources],['issues',d.issues],['status',d.issues?'action needed':'all good']];if(type==='bucket')return[['name',d.name],['region',d.region||'us-east-1'],['lifecycle',d.lifecycle||'none'],['sync',d.sync]];if(type==='sync')return[['app',d.app],['revision',d.revision],['result',d.phase]];if(type==='scale')return[['app',d.app],['replicas',d.replicas],['sync',d.sync]];if(type==='list')return d.items.map((x,i)=>[[`[${i}]`,x]]);return[];}
+    function resultTitle(t){return{health:'health check',bucket:'bucket provisioned',sync:'sync complete',scale:'scaling done',list:'resources'}[t]||t;}
+    function renderMd(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
+    function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+    async function run(preset){const text=(preset||$('inp').value).trim();if(!text)return;$('inp').value='';$('send-btn').disabled=true;addUserBubble(text);const c=addAgentEntry();c.scrollIntoView({behavior:'smooth',block:'nearest'});const lp=text.toLowerCase();const isBucket=lp.includes('bucket')||lp.includes('s3');const isHealth=lp.includes('health')||lp.includes('status');const isSync=lp.includes('sync')&&!lp.includes('bucket');const isScale=lp.includes('scale')||lp.includes('replica');const isList=lp.includes('list')||lp.includes('show');let s1=addStep(c,'Parsing intent...');await sleep(350);updateStep(s1,'done');let s2=addStep(c,'Selecting MCP tools...');await sleep(300);updateStep(s2,'done');if(isHealth||isList){let s=addStep(c,'Calling argocd:list_apps');const t=addTool(c,'argocd:list_apps','argocd','running',{refresh:false},null);await sleep(700);updateStep(s,'done');updateTool(t,'ok',{items:['demo-infra → OutOfSync/Healthy','nginx-demo → Synced/Healthy']});let s2b=addStep(c,'Calling argocd:get_resource_tree');const t2=addTool(c,'argocd:get_resource_tree','argocd','running',{applicationName:'demo-infra'},null);await sleep(600);updateStep(s2b,'done');updateTool(t2,'ok',{nodes:['Bucket/demo-bucket-crossplane (Synced)','Bucket/e2e-test-001 (OutOfSync)']});const r=addResponse(c);if(isList){await streamInto(r,'**ArgoCD applications:**\n`demo-infra` — OutOfSync / Healthy (crossplane-system)\n`nginx-demo` — Synced / Healthy (default)\n\n**S3 buckets (Crossplane):**\n`demo-bucket-crossplane` — Synced\n`e2e-test-001` — OutOfSync (lifecycle rule pending)');addResult(c,'list',{items:['demo-infra (OutOfSync)','nginx-demo (Synced)','demo-bucket-crossplane (Synced)','e2e-test-001 (OutOfSync)']});}else{await streamInto(r,'**2 apps** running, **4 resources** tracked.\n`demo-infra` is OutOfSync — lifecycle rule pending.\n`nginx-demo` is Synced and Healthy on `nginx:1.27.4` with 2 replicas.\n\nRun `sync demo-infra` to resolve drift.');addResult(c,'health',{apps:2,resources:4,issues:1});}}else if(isSync){const app=lp.match(/sync\s+(\S+)/)?.[1]||'demo-infra';let s=addStep(c,`Syncing ${app}...`);const t=addTool(c,'argocd:sync','argocd','running',{name:app,prune:true},null);await sleep(900);const rev=Math.random().toString(16).slice(2,10);updateStep(s,'done');updateTool(t,'ok',{phase:'Succeeded',revision:rev});const r=addResponse(c);await streamInto(r,`**${app}** synced. Revision \`${rev}\` — all resources reconciled.`);addResult(c,'sync',{app,revision:rev,phase:'Succeeded'});$('pill-drift').className='pill ok';$('pill-drift').textContent='Synced';}else if(isBucket){const nm=text.match(/\b([a-z][a-z0-9-]{2,})\b/g)||[];const bucket=nm.find(n=>!['create','bucket','s3','new','a','an','the','with'].includes(n))||'test-'+Date.now().toString(36).slice(-4);let s=addStep(c,'Generating manifest...');await sleep(400);updateStep(s,'done');let s2c=addStep(c,`github:create_file → infra/${bucket}-bucket.yaml`);const t=addTool(c,'github:create_file','github','running',{path:`infra/${bucket}-bucket.yaml`,branch:'main'},null);await sleep(900);updateStep(s2c,'done');updateTool(t,'ok',{sha:Math.random().toString(16).slice(2,10),committed:true});let s3=addStep(c,'ArgoCD sync...');const t2=addTool(c,'argocd:sync','argocd','running',{name:'demo-infra',prune:true},null);await sleep(800);updateStep(s3,'done');updateTool(t2,'ok',{phase:'Succeeded',message:`bucket ${bucket} created`});const r=addResponse(c);await streamInto(r,`Bucket \`${bucket}\` provisioned. Manifest committed → ArgoCD synced → Crossplane called AWS S3 API. Live in \`us-east-1\`.`);addResult(c,'bucket',{name:bucket,region:'us-east-1',lifecycle:'7 days',sync:'Synced'});}else if(isScale){const n=lp.match(/(\d+)/)?.[1]||'3';let s=addStep(c,'Reading deployment.yaml...');const t=addTool(c,'github:get_file','github','running',{path:'apps/deployment.yaml'},null);await sleep(500);updateStep(s,'done');updateTool(t,'ok',{replicas:2,image:'nginx:1.27.4'});let s2d=addStep(c,`Updating replicas → ${n}`);const t2=addTool(c,'github:create_file','github','running',{path:'apps/deployment.yaml'},null);await sleep(700);updateStep(s2d,'done');updateTool(t2,'ok',{sha:Math.random().toString(16).slice(2,10)});let s3=addStep(c,'Syncing nginx-demo...');const t3=addTool(c,'argocd:sync','argocd','running',{name:'nginx-demo'},null);await sleep(600);updateStep(s3,'done');updateTool(t3,'ok',{phase:'Succeeded'});const r=addResponse(c);await streamInto(r,`nginx-demo scaled to **${n} replicas**. Git updated → ArgoCD synced → rolling update in progress.`);addResult(c,'scale',{app:'nginx-demo',replicas:n,sync:'Synced'});}else{const key=$('api-key').value.trim();const model=$('model-sel').value;let s=addStep(c,`Calling ${model}...`);await sleep(300);if(key&&model==='claude'){updateStep(s,'active');try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:'You are a GitOps assistant for ArgoCD, Crossplane, and GitHub. Give a brief, practical answer. Use backticks for resource names.',messages:[{role:'user',content:text}]})});const data=await res.json();updateStep(s,'done');const r=addResponse(c);await streamInto(r,data.content?.[0]?.text||'No response.');}catch(e){updateStep(s,'error');addResponse(c).textContent='Error: '+e.message;}}else{updateStep(s,'done');const r=addResponse(c);await streamInto(r,`To run **"${text}"** live, add your API key above. For built-in actions (sync, bucket, scale, health) use the chips — no key needed.`);}}
+    $('send-btn').disabled=false;c.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    <\/script>
+    </body>
+    </html>
