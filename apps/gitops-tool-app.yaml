@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops-tool
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.app
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/knottysanka/argocd-demo
+    targetRevision: HEAD
+    path: apps/gitops-tool
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
