@@ -9,5 +9,12 @@ metadata:
 spec:
   forProvider:
     region: us-east-1
+    lifecycleRule:
+      - id: expire-test-objects
+        enabled: true
+        expiration:
+          - days: 7
+        noncurrentVersionExpiration:
+          - noncurrentDays: 1
   providerConfigRef:
     name: default
