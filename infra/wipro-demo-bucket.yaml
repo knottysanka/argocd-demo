@@ -1,0 +1,13 @@
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  name: wipro-demo
+  annotations:
+    crossplane.io/external-name: wipro-demo
+  labels:
+    purpose: wipro-demo
+spec:
+  forProvider:
+    region: us-east-1
+  providerConfigRef:
+    name: default
