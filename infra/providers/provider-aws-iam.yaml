@@ -1,0 +1,10 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws-iam
+spec:
+  package: xpkg.upbound.io/upbound/provider-aws-iam:v1.14.0
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  providerConfigRef:
+    name: default

@@ -1,0 +1,18 @@
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: eks-test-vpc
+  namespace: crossplane-system
+  labels:
+    cluster: eks-test
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.0.0.0/16
+    enableDnsHostnames: true
+    enableDnsSupport: true
+    tags:
+      Name: eks-test-vpc
+      purpose: eks-test
+  providerConfigRef:
+    name: default
